@@ -1,0 +1,12 @@
+1..1
+Version: ImageMagick 7.1.0-27 Q16-HDRI x86_64 2022-03-04 https://imagemagick.org
+Copyright: (C) 1999 ImageMagick Studio LLC
+
+ImageMagick Validation Suite (Stream)
+
+validate stream command line program:
+  test 0: ... pass.
+  summary: 1 subtests; 1 passed; 0 failed.
+validation suite: 1 tests; 1 passed; 0 failed.
+ok
+PASS: tests/validate-stream.tap 1
