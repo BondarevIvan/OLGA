@@ -13,7 +13,7 @@ class EdgeDetector
         EdgeDetector(std::shared_ptr<ImgMgr> image);
         ~EdgeDetector();
 
-        virtual void detect_edges(bool serial) = 0;
+        virtual void detect_edges(bool serial, int num_threads) = 0;
         void single_channel_to_grayscale(pixel_t *out_grayscale, pixel_channel_t *in_pixels, unsigned rows, unsigned cols);
 
     protected:

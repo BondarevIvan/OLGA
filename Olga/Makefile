@@ -21,11 +21,11 @@ INC = -I$(CURDIR)/inc
 #-- Do not edit below this line --
 
 ifeq ($(DEBUG),1)
-CFLAGS += -DDEBUG -g -O0
-NVCFLAGS += -g -G -O0
+CFLAGS += -DDEBUG -g -O0 
+NVCFLAGS += -g -G -O0 
 else
-CLAGS += -O2
-NVCFLAGS += -O2
+CLAGS += -O2 
+NVCFLAGS += -O2 
 endif
 
 # Subdirs to search for additional source files
@@ -69,4 +69,4 @@ clean:
 	rm -f $(CUDA_OBJS)
 
 run:
-	LD_LIBRARY_PATH=$(LD_LIBRARY_PATH) $(RUNDIR)/$(PROJ) -s -i ./img/Engine_in.PNG -o ./img/Engine_out.PNG
+	LD_LIBRARY_PATH=$(LD_LIBRARY_PATH) $(RUNDIR)/$(PROJ) -s -i ./img/Engine_in.PNG -o ./img/Engine_out.PNG 

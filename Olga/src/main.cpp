@@ -46,7 +46,7 @@ int main(int argc, char** argv)
     CannyEdgeDetector ced(img_mgr);
 
     /* run edge detection algorithm */
-    ced.detect_edges(args.serial);
+    ced.detect_edges(args.serial, 1);
 
     /* write results */
     img_mgr->write_image(args.outFile);

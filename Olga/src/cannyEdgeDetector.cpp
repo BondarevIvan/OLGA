@@ -24,7 +24,7 @@ CannyEdgeDetector::~CannyEdgeDetector(void)
 
 }
 
-void CannyEdgeDetector::detect_edges(bool serial)
+void CannyEdgeDetector::detect_edges(bool serial, int num_threads)
 {
     pixel_t *orig_pixels = m_image_mgr->getPixelHandle();
     unsigned input_pixel_length = m_image_mgr->getPixelCount();
@@ -55,7 +55,7 @@ void CannyEdgeDetector::detect_edges(bool serial)
 
         /* run canny edge detection core */
         // you can swap the serial and parallel steps of the algorithm here for debug etc.
-        apply_gaussian_filter(rgb_buf, orig_pixels, kernel);
+        apply_gaussian_filter(rgb_buf, orig_pixels, kernel, num_threads);
         
         compute_intensity_gradient(rgb_buf, deltaX_gray, deltaY_gray, input_pixel_length);
         //cu_test_gradient(rgb_buf, deltaX_gray, deltaY_gray, rows, cols);
@@ -93,7 +93,7 @@ void CannyEdgeDetector::detect_edges(bool serial)
     delete []single_channel_buf0;
 }
 
-void CannyEdgeDetector::apply_gaussian_filter(pixel_t *out_pixels, pixel_t *in_pixels, double kernel[KERNEL_SIZE][KERNEL_SIZE])
+void CannyEdgeDetector::apply_gaussian_filter(pixel_t *out_pixels, pixel_t *in_pixels, double kernel[KERNEL_SIZE][KERNEL_SIZE], int num_threads)
 {
     int rows = m_image_mgr->getImgHeight();
     int cols = m_image_mgr->getImgWidth();
@@ -103,32 +103,34 @@ void CannyEdgeDetector::apply_gaussian_filter(pixel_t *out_pixels, pixel_t *in_p
     double bluePixelVal;
 
     //Apply Kernel to image
-    for (int pixNum = 0; pixNum < rows * cols; ++pixNum) {
+    {
+        for (int pixNum = 0; pixNum < rows * cols; ++pixNum) {
 
-        for (int i = 0; i < KERNEL_SIZE; ++i) {
-            for (int j = 0; j < KERNEL_SIZE; ++j) {                   
+            for (int i = 0; i < KERNEL_SIZE; ++i) {
+                for (int j = 0; j < KERNEL_SIZE; ++j) {                   
 
-                //check edge cases, if within bounds, apply filter
-                if (((pixNum + ((i - ((KERNEL_SIZE - 1) / 2))*cols) + j - ((KERNEL_SIZE - 1) / 2)) >= 0)
-                    && ((pixNum + ((i - ((KERNEL_SIZE - 1) / 2))*cols) + j - ((KERNEL_SIZE - 1) / 2)) <= rows*cols-1)
-                    && (((pixNum % cols) + j - ((KERNEL_SIZE-1)/2)) >= 0)
-                    && (((pixNum % cols) + j - ((KERNEL_SIZE-1)/2)) <= (cols-1))) {
+                    //check edge cases, if within bounds, apply filter
+                    if (((pixNum + ((i - ((KERNEL_SIZE - 1) / 2))*cols) + j - ((KERNEL_SIZE - 1) / 2)) >= 0)
+                        && ((pixNum + ((i - ((KERNEL_SIZE - 1) / 2))*cols) + j - ((KERNEL_SIZE - 1) / 2)) <= rows*cols-1)
+                        && (((pixNum % cols) + j - ((KERNEL_SIZE-1)/2)) >= 0)
+                        && (((pixNum % cols) + j - ((KERNEL_SIZE-1)/2)) <= (cols-1))) {
 
-                    redPixelVal += kernel[i][j] * in_pixels[pixNum + ((i - ((KERNEL_SIZE - 1) / 2))*cols) + j - ((KERNEL_SIZE - 1) / 2)].red;
-                    greenPixelVal += kernel[i][j] * in_pixels[pixNum + ((i - ((KERNEL_SIZE - 1) / 2))*cols) + j - ((KERNEL_SIZE - 1) / 2)].green;
-                    bluePixelVal += kernel[i][j] * in_pixels[pixNum + ((i - ((KERNEL_SIZE - 1) / 2))*cols) + j - ((KERNEL_SIZE - 1) / 2)].blue;
-                    kernelSum += kernel[i][j];
+                        redPixelVal += kernel[i][j] * in_pixels[pixNum + ((i - ((KERNEL_SIZE - 1) / 2))*cols) + j - ((KERNEL_SIZE - 1) / 2)].red;
+                        greenPixelVal += kernel[i][j] * in_pixels[pixNum + ((i - ((KERNEL_SIZE - 1) / 2))*cols) + j - ((KERNEL_SIZE - 1) / 2)].green;
+                        bluePixelVal += kernel[i][j] * in_pixels[pixNum + ((i - ((KERNEL_SIZE - 1) / 2))*cols) + j - ((KERNEL_SIZE - 1) / 2)].blue;
+                        kernelSum += kernel[i][j];
+                    }
                 }
             }
+            out_pixels[pixNum].red = redPixelVal / kernelSum;
+            out_pixels[pixNum].green = greenPixelVal / kernelSum;
+            out_pixels[pixNum].blue = bluePixelVal / kernelSum;
+            redPixelVal = 0;
+            greenPixelVal = 0;
+            bluePixelVal = 0;
+            kernelSum = 0;
         }
-        out_pixels[pixNum].red = redPixelVal / kernelSum;
-        out_pixels[pixNum].green = greenPixelVal / kernelSum;
-        out_pixels[pixNum].blue = bluePixelVal / kernelSum;
-        redPixelVal = 0;
-        greenPixelVal = 0;
-        bluePixelVal = 0;
-        kernelSum = 0;
-    }            
+    }
 }
 
 void CannyEdgeDetector::compute_intensity_gradient(pixel_t *in_pixels, pixel_channel_t_signed *deltaX_channel, pixel_channel_t_signed *deltaY_channel,unsigned max_pixel_cnt)
