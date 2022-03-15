@@ -6,6 +6,8 @@
 #include "cannyEdgeDetector.hpp"
 #include "canny.h"
 
+using namespace detector;
+
 int main(int argc, char** argv)
 {
     /* storage and defaults for command line arguments */

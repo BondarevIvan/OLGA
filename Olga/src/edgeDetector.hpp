@@ -5,14 +5,8 @@
 #include "ed_pixel.h"
 #include "imgMgr.hpp"
 
-///
-/// \brief Edge dectector class
-///
-/// Defines the edge detection interface.
-/// Interfaces with a wrapper for an image handling library
-/// and detects edges based on an arbitrary algorithm.
-/// Can run in parallel on a GPU or serially on the host CPU.
-///
+namespace detector {
+
 class EdgeDetector
 {
     public:
@@ -26,4 +20,5 @@ class EdgeDetector
         std::shared_ptr<ImgMgr> m_image_mgr;
 };
 
+}
 #endif // _EDGE_DETECTOR_HPP_

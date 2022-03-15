@@ -8,13 +8,7 @@
 #include <Magick++.h>
 #include "ed_pixel.h"
 
-///
-/// \brief Image manager class
-///
-/// Wrapper for image wrangling library, in our case libmagick++
-/// Provides utilites to open and close image files, and provides 
-/// the edge detector class with access to the image data.
-///
+namespace detector {
 class ImgMgr
 {
     public:
@@ -38,5 +32,5 @@ class ImgMgr
         int m_channel_depth;
         pixel_t *m_pixels;
 };
-
+}
 #endif // _IMG_MGR_HPP_

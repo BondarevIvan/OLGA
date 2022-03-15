@@ -4,11 +4,8 @@
 #define KERNEL_SIZE 7
 #include "edgeDetector.hpp"
 
-///
-/// \brief Canny edge dectectior
-///
-/// Encapsulates the canny edge detection algorithm.
-///
+namespace detector {
+
 class CannyEdgeDetector : public EdgeDetector
 {
     public:
@@ -34,4 +31,5 @@ class CannyEdgeDetector : public EdgeDetector
         pixel_channel_t m_edge; // defines an edge for image this detector was initialized with
 };
 
+}
 #endif // _CANNY_EDGE_DETECTOR_HPP_

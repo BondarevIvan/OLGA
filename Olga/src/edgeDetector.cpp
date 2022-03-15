@@ -1,6 +1,8 @@
 
 #include "edgeDetector.hpp"
 
+namespace detector {
+
 EdgeDetector::EdgeDetector(std::shared_ptr<ImgMgr> image)
 : m_image_mgr(image)
 {
@@ -12,9 +14,6 @@ EdgeDetector::~EdgeDetector(void)
 
 }
 
-///
-/// \brief Convert single channel to grayscale. 
-///
 void EdgeDetector::single_channel_to_grayscale(pixel_t *out_grayscale, pixel_channel_t *in_pixels, unsigned rows, unsigned cols)
 {
     unsigned idx = 0;
@@ -26,4 +25,6 @@ void EdgeDetector::single_channel_to_grayscale(pixel_t *out_grayscale, pixel_cha
             out_grayscale[idx].blue = in_pixels[idx];
         }
     }
+}
+
 }

@@ -326,18 +326,6 @@ void trace_immed_neighbors(pixel_channel_t *out_pixels, pixel_channel_t *in_pixe
     }
 }
 
-///
-/// \brief CUDA implementation of Canny hysteresis high thresholding.
-///
-/// This kernel is the first pass in the parallel hysteresis step.
-/// It launches a thread for every pixel and checks if the value of that pixel
-/// is above a high threshold. If it is, the thread marks it as a strong edge (set to 1)
-/// in a pixel map and sets the value to the channel max. If it is not, the thread sets
-/// the pixel map at the index to 0 and zeros the output buffer space at that index.
-///
-/// The output of this step is a mask of strong edges and an output buffer with white values
-/// at the mask indices which are set.
-///
 __global__
 void cu_hysteresis_high(pixel_channel_t *out_pixels, pixel_channel_t *in_pixels, unsigned *strong_edge_mask, 
                         pixel_channel_t t_high, unsigned img_height, unsigned img_width)
@@ -355,19 +343,6 @@ void cu_hysteresis_high(pixel_channel_t *out_pixels, pixel_channel_t *in_pixels,
     }
 }
 
-///
-/// \brief CUDA implementation of Canny hysteresis low thresholding.
-///
-/// This kernel is the second pass in the parallel hysteresis step. 
-/// It launches a thread for every pixel, but skips the first and last rows and columns.
-/// For surviving threads, the pixel at the thread ID index is checked to see if it was 
-/// previously marked as a strong edge in the first pass. If it was, the thread checks 
-/// their eight immediate neighbors and connects them (marks them as strong edges)
-/// if the neighbor is above the low threshold.
-///
-/// The output of this step is an output buffer with both "strong" and "connected" edges
-/// set to whtie values. This is the final edge detected image.
-///
 __global__
 void cu_hysteresis_low(pixel_channel_t *out_pixels, pixel_channel_t *in_pixels, unsigned *strong_edge_mask,
                         unsigned t_low, unsigned img_height, unsigned img_width)
@@ -383,13 +358,6 @@ void cu_hysteresis_low(pixel_channel_t *out_pixels, pixel_channel_t *in_pixels, 
         }
     }
 }
-
-//*****************************************************************************************
-// Test/Debug hooks for separate kernels
-// These generally aren't to be used, but can serve as drop-in replacements for any
-// particular step of the algorithm's serial implementation.
-// Useful for debugging individual kernels.
-//*****************************************************************************************
 
 void cu_test_gradient(pixel_t *buf0, pixel_channel_t_signed *deltaX_gray, pixel_channel_t_signed *deltaY_gray, unsigned rows, unsigned cols)
 {
@@ -492,10 +460,6 @@ void cu_test_hysteresis(pixel_channel_t *in, pixel_channel_t *out, unsigned rows
     cudaFree(out_pixels);
     cudaFree(idx_map);
 }
-
-//*****************************************************************************************
-// Entry point for serial program calling CUDA implementation
-//*****************************************************************************************
 
 void cu_detect_edges(pixel_channel_t *final_pixels, pixel_t *orig_pixels, int rows, int cols, double kernel[KERNEL_SIZE][KERNEL_SIZE]) 
 {

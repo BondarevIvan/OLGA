@@ -10,6 +10,8 @@
 #include "cannyEdgeDetector.hpp"
 #include "canny.h"
 
+namespace detector {
+
 CannyEdgeDetector::CannyEdgeDetector(std::shared_ptr<ImgMgr> image)
 : EdgeDetector(image)
 {
@@ -22,10 +24,6 @@ CannyEdgeDetector::~CannyEdgeDetector(void)
 
 }
 
-///
-/// \brief Runs the canny edge detection algorithm on an image represented by
-/// the image manager instance this edge detection instance was constructed with.
-///
 void CannyEdgeDetector::detect_edges(bool serial)
 {
     pixel_t *orig_pixels = m_image_mgr->getPixelHandle();
@@ -95,9 +93,6 @@ void CannyEdgeDetector::detect_edges(bool serial)
     delete []single_channel_buf0;
 }
 
-///
-/// This function is used to slightly blur the image to remove noise and spurious edges.
-///
 void CannyEdgeDetector::apply_gaussian_filter(pixel_t *out_pixels, pixel_t *in_pixels, double kernel[KERNEL_SIZE][KERNEL_SIZE])
 {
     int rows = m_image_mgr->getImgHeight();
@@ -136,9 +131,6 @@ void CannyEdgeDetector::apply_gaussian_filter(pixel_t *out_pixels, pixel_t *in_p
     }            
 }
 
-///
-/// \brief Compute gradient (first order derivative x and y) of color contrast.
-///
 void CannyEdgeDetector::compute_intensity_gradient(pixel_t *in_pixels, pixel_channel_t_signed *deltaX_channel, pixel_channel_t_signed *deltaY_channel,unsigned max_pixel_cnt)
 {
     unsigned offset = m_image_mgr->getImgWidth();
@@ -211,10 +203,6 @@ void CannyEdgeDetector::compute_intensity_gradient(pixel_t *in_pixels, pixel_cha
     delete [] deltaY;
 }
 
-
-///
-/// \brief Compute magnitude of gradient(deltaX & deltaY) per pixel.
-///
 void CannyEdgeDetector::magnitude(pixel_channel_t_signed *deltaX, pixel_channel_t_signed *deltaY, pixel_channel_t *out_pixel, unsigned max_pixel_cnt)
 {
     unsigned idx;
@@ -231,12 +219,6 @@ void CannyEdgeDetector::magnitude(pixel_channel_t_signed *deltaX, pixel_channel_
         }
 }
 
-///
-/// \brief Non Maximal Suppression
-/// If the centre pixel is not greater than neighboured pixels in the direction,
-/// then the center pixel is set to zero.
-/// This process results in one pixel wide ridges.
-///
 void CannyEdgeDetector::suppress_non_max(pixel_channel_t *mag, pixel_channel_t_signed *deltaX, pixel_channel_t_signed *deltaY, pixel_channel_t *nms)
 {
     unsigned t = 0;
@@ -358,11 +340,6 @@ void CannyEdgeDetector::suppress_non_max(pixel_channel_t *mag, pixel_channel_t_s
     }
 }
 
-///
-/// \brief Hysteresis step. This is used to 
-/// a) remove weak edges 
-/// b) connect "split edges" (to preserve weak-touching-strong edges)
-///
 void CannyEdgeDetector::apply_hysteresis(pixel_channel_t *out_pixels, pixel_channel_t *in_pixels, pixel_channel_t t_high, pixel_channel_t t_low)
 {
     /* skip first and last rows and columns, since we'll check them as surrounding neighbors of 
@@ -389,9 +366,6 @@ void CannyEdgeDetector::apply_hysteresis(pixel_channel_t *out_pixels, pixel_chan
     }
 }
 
-///
-/// \brief Helpfer function to create convolutional kernel for gaussian blur.
-///
 void CannyEdgeDetector::populate_blur_kernel(double out_kernel[KERNEL_SIZE][KERNEL_SIZE])
 {
     double scaleVal = 1;
@@ -423,10 +397,6 @@ void CannyEdgeDetector::populate_blur_kernel(double out_kernel[KERNEL_SIZE][KERN
     }
 }
 
-///
-/// \brief This function looks at the 8 surrounding neighbor pixels of a given pixel and 
-/// marks them as edges if they're above a low threshold value. Used in hysteresis.
-///
 void CannyEdgeDetector::trace_immed_neighbors(pixel_channel_t *out_pixels, pixel_channel_t *in_pixels, unsigned idx, pixel_channel_t t_low)
 {
     assert(nullptr != in_pixels);
@@ -470,4 +440,6 @@ void CannyEdgeDetector::trace_immed_neighbors(pixel_channel_t *out_pixels, pixel
     if ((in_pixels[se] >= t_low) && (out_pixels[se] != m_edge)) {
         out_pixels[se] = m_edge;
     }
+}
+
 }
